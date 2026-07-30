@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSocket } from '../../context/SocketContext';
 import { 
@@ -8,7 +8,7 @@ import {
   Clock, Sparkles, Flame, Check, HelpCircle
 } from 'lucide-react';
 
-export default function PlayPage() {
+function PlayForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
@@ -437,5 +437,17 @@ export default function PlayPage() {
         <span>Game PIN: <span className="font-mono text-white font-bold">{code}</span></span>
       </footer>
     </div>
+  );
+}
+
+export default function PlayPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-indigo-500"></div>
+      </div>
+    }>
+      <PlayForm />
+    </Suspense>
   );
 }

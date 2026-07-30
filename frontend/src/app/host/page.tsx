@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSocket } from '../../context/SocketContext';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -9,7 +9,7 @@ import {
   Unlock, Lock, RefreshCw, BarChart3, CheckCircle, Flame
 } from 'lucide-react';
 
-export default function HostPage() {
+function HostForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const quizId = searchParams.get('quizId');
@@ -465,5 +465,17 @@ export default function HostPage() {
         <span>Participants inside: <span className="text-white font-bold">{participants.length}</span></span>
       </footer>
     </div>
+  );
+}
+
+export default function HostPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-indigo-500"></div>
+      </div>
+    }>
+      <HostForm />
+    </Suspense>
   );
 }
