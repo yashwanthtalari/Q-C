@@ -6,7 +6,8 @@ import { useSocket } from '../../context/SocketContext';
 import { useAuthStore } from '../../store/useAuthStore';
 import { 
   ArrowLeft, Users, Play, SkipForward, AlertCircle, Trophy, 
-  Unlock, Lock, RefreshCw, BarChart3, CheckCircle, Flame
+  Unlock, Lock, RefreshCw, BarChart3, CheckCircle, Flame,
+  Link2, Copy, Check
 } from 'lucide-react';
 
 function HostForm() {
@@ -26,6 +27,16 @@ function HostForm() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    if (!accessCode) return;
+    const url = `${window.location.origin}/?code=${accessCode}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   useEffect(() => {
     initialize();
@@ -214,6 +225,33 @@ function HostForm() {
                 <div className="absolute inset-0 rounded-3xl border border-indigo-500/20 pointer-events-none animate-pulse"></div>
               </div>
               <p className="text-slate-400 text-sm mt-3">Go to home page and enter PIN code to join</p>
+              
+              {accessCode && (
+                <div className="mt-4 flex flex-col items-center gap-2">
+                  <span className="text-xs text-slate-500 font-semibold flex items-center gap-1 justify-center">
+                    <Link2 className="w-3.5 h-3.5 text-indigo-400" /> Share Direct Join Link
+                  </span>
+                  <div className="flex items-center gap-2 bg-indigo-950/30 border border-indigo-500/20 rounded-2xl px-4 py-2.5 text-xs">
+                    <span className="text-indigo-300 font-mono select-all">
+                      {typeof window !== 'undefined' ? `${window.location.origin}/?code=${accessCode}` : `/?code=${accessCode}`}
+                    </span>
+                    <button
+                      onClick={handleCopyLink}
+                      className="text-indigo-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1 font-bold bg-transparent border-0"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-green-400" /> Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" /> Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Waiting roster */}

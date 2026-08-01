@@ -2,17 +2,14 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15-alpine
-    container_name: quiz_postgres
+    image: mongo:latest
+    container_name: quiz_mongo
     restart: always
-    environment:
-      POSTGRES_USER: quiz_user
-      POSTGRES_PASSWORD: quiz_password_9921
-      POSTGRES_DB: quiz_db
     ports:
-      - "5432:5432"
+      - "27017:27017"
+    command: mongod --replSet rs0 --bind_ip_all
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mongo_data:/data/db
 
   backend:
     build:
@@ -24,7 +21,7 @@ services:
       - "4000:4000"
     environment:
       - PORT=4000
-      - DATABASE_URL=postgresql://quiz_user:quiz_password_9921@db:5432/quiz_db?schema=public
+      - DATABASE_URL=mongodb://db:27017/quiz_class?replicaSet=rs0
       - JWT_SECRET=quiz-class-secret-key-12345
     depends_on:
       - db
@@ -44,4 +41,4 @@ services:
       - backend
 
 volumes:
-  postgres_data:
+  mongo_data:

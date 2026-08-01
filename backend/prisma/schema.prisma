@@ -1,6 +1,6 @@
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -8,7 +8,7 @@ generator client {
 }
 
 model Teacher {
-  id           String    @id @default(uuid())
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
   email        String    @unique
   passwordHash String
   name         String
@@ -19,10 +19,10 @@ model Teacher {
 }
 
 model Class {
-  id          String    @id @default(uuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
-  teacherId   String
+  teacherId   String    @db.ObjectId
   teacher     Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   students    Student[]
   quizzes     Quiz[]
@@ -31,11 +31,11 @@ model Class {
 }
 
 model Student {
-  id           String        @id @default(uuid())
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   email        String?
   pin          String?       // optional roll number or identification code
-  classId      String
+  classId      String        @db.ObjectId
   class        Class         @relation(fields: [classId], references: [id], onDelete: Cascade)
   participants Participant[] // records when this student plays a live session
   createdAt    DateTime      @default(now())
@@ -43,12 +43,12 @@ model Student {
 }
 
 model Quiz {
-  id          String        @id @default(uuid())
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String?
-  teacherId   String
+  teacherId   String        @db.ObjectId
   teacher     Teacher       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  classId     String?
+  classId     String?       @db.ObjectId
   class       Class?        @relation(fields: [classId], references: [id], onDelete: SetNull)
   questions   Question[]
   sessions    QuizSession[]
@@ -57,8 +57,8 @@ model Quiz {
 }
 
 model Question {
-  id          String             @id @default(uuid())
-  quizId      String
+  id          String             @id @default(auto()) @map("_id") @db.ObjectId
+  quizId      String             @db.ObjectId
   quiz        Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
   text        String
   type        String             // MCQ, MULTI_SELECT, TRUE_FALSE, IMAGE, FILL_IN, SHORT_ANSWER, POLL
@@ -73,8 +73,8 @@ model Question {
 }
 
 model Option {
-  id         String   @id @default(uuid())
-  questionId String
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  questionId String   @db.ObjectId
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   text       String
   isCorrect  Boolean  @default(false)
@@ -82,8 +82,8 @@ model Option {
 }
 
 model QuizSession {
-  id                       String        @id @default(uuid())
-  quizId                   String
+  id                       String        @id @default(auto()) @map("_id") @db.ObjectId
+  quizId                   String        @db.ObjectId
   quiz                     Quiz          @relation(fields: [quizId], references: [id], onDelete: Cascade)
   status                   String        // WAITING, ACTIVE, LEADERBOARD, COMPLETED
   currentQuestionIndex     Int           @default(-1)
@@ -95,11 +95,11 @@ model QuizSession {
 }
 
 model Participant {
-  id            String             @id @default(uuid())
-  sessionId     String
+  id            String             @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId     String             @db.ObjectId
   session       QuizSession        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   name          String
-  studentId     String?            // links to a registered student profile if applicable
+  studentId     String?            @db.ObjectId
   student       Student?           @relation(fields: [studentId], references: [id], onDelete: SetNull)
   joinedAt      DateTime           @default(now())
   score         Int                @default(0)
@@ -110,10 +110,10 @@ model Participant {
 }
 
 model AnswerSubmission {
-  id              String      @id @default(uuid())
-  participantId   String
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  participantId   String      @db.ObjectId
   participant     Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
-  questionId      String
+  questionId      String      @db.ObjectId
   question        Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
   chosenOptionIds String      // comma-separated Option UUIDs or JSON string
   textAnswer      String?     // for fill-in/short answer

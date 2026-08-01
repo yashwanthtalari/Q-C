@@ -17,6 +17,14 @@ export default function HomePage() {
 
   useEffect(() => {
     initialize();
+    
+    // Check if code is passed as a query parameter
+    const params = new URLSearchParams(window.location.search);
+    const codeParam = params.get('code');
+    if (codeParam && codeParam.length === 6 && !isNaN(Number(codeParam))) {
+      setAccessCode(codeParam);
+      setShowNameInput(true);
+    }
   }, [initialize]);
 
   const handleVerifyCode = (e: React.FormEvent) => {
